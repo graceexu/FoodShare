@@ -11,8 +11,6 @@ async function connectToDatabase() {
       useUnifiedTopology: true,
     });
 
-    console.log('Connection to MongoDB successful.');
-
     // test connection by sending a ping
     const adminDb = mongoose.connection.db.admin();
     const pingResult = await adminDb.ping();
