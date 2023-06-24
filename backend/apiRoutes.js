@@ -26,12 +26,19 @@ const checkTokenExpiration = (req, res, next) => {
   if (token) {
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
       if (err) {
-        // token is expired or invalid -> generate a new token
-        const user = getUserFromDecodedToken(decoded);
-        const newToken = generateToken(user);
-        req.headers.authorization = newToken;
+        if (err.name === 'TokenExpiredError') {
+          // token has expired, perform token refresh
+          const user = getUserFromDecodedToken(decoded);
+          const newToken = generateToken(user);
+          req.headers.authorization = newToken;
+        } else { // token is invalid
+          return res.redirect('/login'); // redirect to login page
+        }
       }
     });
+  } else {
+    // no token provided, redirect to login page
+    return res.redirect('/login');
   }
 
   next();
@@ -261,20 +268,18 @@ router.post('/api/auth/login', checkTokenExpiration, async (req, res) => {
 
 // user logout
 router.post('/api/auth/logout', checkTokenExpiration, async (req, res) => {
-  try {
-    // clear user session or token. session based auth
-    // ... implement token-based authentication, clear the token from client-side instead
-    // ... or handle token expiration on the client-side
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+      return res.status(500).json({ errors: [{ title: 'Error logging out user' }] });
+    }
 
-    res.status(200).json({ data: { message: 'User logout successful' } });
-  } catch (error) {
-    res.status(500).json({ errors: [{ title: 'Error logging out user' }] });
-  }
+    res.status(200).json({ message: 'User logged out successfully' });
+  });
 });
 
-
 // get user by id
-router.get('/api/users/:id', checkTokenExpiration, async (req, res) => {
+router.get('/api/users/:userType/:id', checkTokenExpiration, async (req, res) => {
   try {
     const { id, userType } = req.params;
     let user;
@@ -294,6 +299,7 @@ router.get('/api/users/:id', checkTokenExpiration, async (req, res) => {
     res.status(500).json({ errors: [{ title: 'Error retrieving user' }] });
   }
 });
+
 
 // update user by id
 router.put('/api/users/:id/update', checkTokenExpiration, async (req, res) => {
