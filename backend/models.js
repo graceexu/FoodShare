@@ -58,7 +58,7 @@ const recipientSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  rname: {
+  name: {
     type: String,
     required: true,
   },
@@ -73,11 +73,6 @@ const recipientSchema = new mongoose.Schema({
   isEligible: {
     type: Boolean,
     default: false,
-  },
-  incomeStatement: {
-    data: Buffer,
-    contentType: String,
-    required: true,
   },
   lastLogout: {
     type: Date,

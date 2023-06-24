@@ -1,7 +1,10 @@
 const express = require('express');
 const session = require('express-session');
 const { connectToDatabase } = require('./db');
+const config = require('./config');
 const apiRoutes = require('./apiRoutes');
+
+const SECRETKEY = config.SECRETKEY
 
 const app = express();
 const port = 3000;
@@ -15,10 +18,9 @@ connectToDatabase();
 // session middleware config
 app.use(
   session({
-    secret: 'your-secret-key',
+    secret: 'SECRETKEY',
     resave: false,
     saveUninitialized: false,
-    store: store,
     cookie: {
       maxAge: 3600000, // session duration in ms
       secure: false,
@@ -26,6 +28,11 @@ app.use(
     },
   })
 );
+
+// file upload route
+app.post('/upload', (req, res) => {
+
+});
 
 // api routes
 app.use(apiRoutes);

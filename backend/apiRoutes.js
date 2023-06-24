@@ -300,7 +300,6 @@ router.get('/api/users/:userType/:id', checkTokenExpiration, async (req, res) =>
   }
 });
 
-
 // update user by id
 router.put('/api/users/:id/update', checkTokenExpiration, async (req, res) => {
   try {
