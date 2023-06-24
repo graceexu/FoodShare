@@ -7,8 +7,8 @@ const jwt = require('jsonwebtoken');
 const { Listing, Organization, Recipient } = require('./models');
 
 const GOOGLEMAPSAPI_KEY = config.GOOGLEMAPSAPI_KEY;
-const JWT_SECRET = config.JWT_SECRET;
-const JWT_EXPIRATION = config.JWT_EXPIRATION;
+const JWT_SECRET = config.JWT.SECRET;
+const JWT_EXPIRATION = config.JWT.EXPIRATION;
 
 // helper function to generate jwt token
 const generateToken = (user) => {
