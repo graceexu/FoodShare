@@ -19,7 +19,7 @@ const generateToken = (user) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
 };
 
-// middleware to check token expiration
+/// middleware to check token expiration
 const checkTokenExpiration = (req, res, next) => {
   const token = req.headers.authorization;
 
@@ -30,22 +30,28 @@ const checkTokenExpiration = (req, res, next) => {
           // token has expired, perform token refresh
           const user = getUserFromDecodedToken(decoded);
           const newToken = generateToken(user);
-          req.headers.authorization = newToken;
-        } else { // token is invalid
-          return res.redirect('/login'); // redirect to login page
+          req.headers.authorization = `Bearer ${newToken}`; // Update the token in the request headers
+        } else {
+          // token is invalid
+          return res.status(401).json({ errors: [{ title: 'Invalid token' }] });
         }
       }
+      // Token is valid, continue to the next middleware/route handler
+      next();
     });
   } else {
-    // no token provided, redirect to login page
-    return res.redirect('/login');
+    // no token provided
+    return res.status(401).json({ errors: [{ title: 'No token provided' }] });
   }
-
-  next();
 };
 
+router.get("/", async (req, res) => {
+  console.log("this is working nice!");
+  res.status(200).json({ message: "looks good here"});
+});
+
 // create new listing
-router.post('/api/listings/create', checkTokenExpiration, checkTokenExpiration, async (req, res) => {
+router.post('/api/listings/create', checkTokenExpiration, async (req, res) => {
   try {
     const { LID, foodName, expirationDate, pickupLocation, unavailabilities } = req.body;
     const listing = new Listing({ LID, foodName, expirationDate, pickupLocation, unavailabilities });
@@ -57,7 +63,7 @@ router.post('/api/listings/create', checkTokenExpiration, checkTokenExpiration, 
 });
 
 // get all listings
-router.get('/api/listings', checkTokenExpiration, checkTokenExpiration, async (req, res) => {
+router.get('/api/listings', checkTokenExpiration, async (req, res) => {
   try {
     const listings = await Listing.find();
     res.status(200).json({ data: listings });
@@ -136,7 +142,7 @@ router.get('/api/listings/search', checkTokenExpiration, async (req, res) => {
     }
 
     // execute query
-    const listings = await Listing.find(query);
+    let listings = await Listing.find(query);
 
     // filter by expiration date
     if (expirationDate) {
@@ -179,7 +185,7 @@ router.get('/api/listings/search', checkTokenExpiration, async (req, res) => {
 });
 
 // register new organization
-router.post('/api/auth/register/organization', checkTokenExpiration, async (req, res) => {
+router.post('/api/auth/register/organization', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
@@ -207,7 +213,8 @@ router.post('/api/auth/register/organization', checkTokenExpiration, async (req,
 });
 
 // register new recipient
-router.post('/api/auth/register/recipient', checkTokenExpiration, async (req, res) => {
+router.post('/api/auth/register/recipient', async (req, res) => {
+  console.log('youre here bro');
   try {
     const { username, email, password } = req.body;
 
