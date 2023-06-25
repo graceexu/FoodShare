@@ -1,7 +1,9 @@
 import { StyleSheet, View, KeyboardAvoidingView } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react'
 import {Button, Input, Image, Avatar, Text} from '@rneui/base';
-import {StatusBar} from "expo-status-bar"
+import { StatusBar } from "expo-status-bar"
+import { updateProfile, getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+
 const RegisterScreen = ({navigation}) => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -9,13 +11,20 @@ const RegisterScreen = ({navigation}) => {
     const [imageurl, setImageUrl] = useState("");
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerBackTitle:"Login"
-        })
-        
-    }, [navigation])
+            headerBackTitle: "Login",
+        });
+    }, [navigation]);
+
     const register = () => {
-        
-    }
+        const auth = getAuth();
+        createUserWithEmailAndPassword(auth, email, password)
+            .then(() => {
+                updateProfile(auth.currentUser, {
+                    displayName: name,
+                    photoURL: imageurl || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
+                })    
+            }).catch(error => alert(error.message));
+    };
     return (
         <KeyboardAvoidingView bahavior="padding" style={styles.container}>
             <StatusBar style="light"/>
